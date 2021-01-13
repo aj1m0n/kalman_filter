@@ -3,6 +3,8 @@
 #include <Ticker.h>
 #include <utility/imumaths.h>
 
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
+
 float accX = 0, accY = 0, accZ = 0;
 float gyroX = 0, gyroY = 0, gyroZ = 0;
 float temp = 0;
@@ -437,12 +439,15 @@ void ini_theta()
 
 void setup()
 {
-    M5.begin(true, false, true);
+    Serial.begin(115200);
 
-    if (M5.IMU.Init() != 0)
-        IMU6886Flag = false;
-    else
-        IMU6886Flag = true;
+    /* Initialise the sensor */
+    if (!bno.begin())
+    {
+        /* There was a problem detecting the BNO055 ... check your connections */
+        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+        while (1);
+    }
 
     //カルマンフィルタの初期設定
     ini_theta();
@@ -454,10 +459,10 @@ void setup()
 void loop()
 {
     //初期化
-    if (M5.Btn.wasPressed())
-    {
-        ini_theta();
-    }
+    // if (M5.Btn.wasPressed())
+    // {
+    //     ini_theta();
+    // }
 
     //加速度センサによる傾斜角
     Serial.print(theta_deg);
@@ -466,16 +471,15 @@ void loop()
     Serial.println(theta_data[0][0]);
 
     //LED表示
-    int line = map(theta_data[0][0], -30, 30, 4, 0);
-    if (line >= 0 && line < 5)
-    {
-        M5.dis.clear();
-        for (int i = 0; i < 5; i++)
-        {
-            M5.dis.drawpix(i * 5 + line, 0xf00000);
-        }
-    }
+    // int line = map(theta_data[0][0], -30, 30, 4, 0);
+    // if (line >= 0 && line < 5)
+    // {
+    //     M5.dis.clear();
+    //     for (int i = 0; i < 5; i++)
+    //     {
+    //         M5.dis.drawpix(i * 5 + line, 0xf00000);
+    //     }
+    // }
 
     delay(50);
-    M5.update();
 }
