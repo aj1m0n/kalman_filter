@@ -1,5 +1,7 @@
-#include "M5Atom.h"
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
 #include <Ticker.h>
+#include <utility/imumaths.h>
 
 float accX = 0, accY = 0, accZ = 0;
 float gyroX = 0, gyroY = 0, gyroZ = 0;
@@ -198,9 +200,18 @@ void offset_cal(){
   gyroZoffset = 0;
 
   for(int i=0; i<10; i++) {
-    M5.IMU.getAccelData(&accX,&accY,&accZ);
-    M5.IMU.getGyroData(&gyroX,&gyroY,&gyroZ);
+    sensors_event_t accelermeterData, angVelocityData;
+    bno.getEvent(&accelermeterData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
+    accX = accelermeterData.acceleration.x;
+    accY = accelermeterData.acceleration.y;
+    accZ = accelermeterData.acceleration.z;
+
+    gyroX = angVelocityData.gyro.x;
+    gyroY = angVelocityData.gyro.y;
+    gyroZ = angVelocityData.gyro.z;
     delay(meas_interval);
+    
     accXoffset += accX;
     accYoffset += accY;
     accZoffset += accZ;
